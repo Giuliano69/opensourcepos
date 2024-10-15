@@ -38,6 +38,12 @@ sudo chown -R www-data:www-data /var/www/html/
 ```
 Files are owned by  www-data so that file ownership will let Apache read them.
 
+## Set permission to wew folder to 750 (0750 = User:rwx Group:r-x World:--- (i.e. World: no access)
+```sh
+sudo chmod -R  750 /var/www/html/writeable/logs
+sudo chmod -R  750 /var/www/html/public/uploads
+sudo chmod -R  750 /var/www/html/writeable/uploads
+```
 ## Create a MySQL database & user; import database tables 
 open a terminal windows, and get mysql admine role
 ```sh 
