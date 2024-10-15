@@ -13,25 +13,7 @@ sudo apt install npm
 sudo apt install composer
 ```
 
-## Create a MySQL database & user; import database tables 
-open a terminal windows, and get mysql admine role
-```sh 
-sudo mysql -u root -p
-```
-When in mysql consolle, give following commands:
-```sh
-CREATE DATABASE ospos;
-CREATE USER 'osposuser'@'localhost' IDENTIFIED BY 'your_password_here';
-GRANT ALL PRIVILEGES ON ospos.* TO 'osposuser'@'localhost';
-FLUSH PRIVILEGES;
-exit
-```
-Now we need an sql file, to import the tables used by ospos. 
-The following  file  [database.sql](https://raw.githubusercontent.com/Giuliano69/opensourcepos/refs/heads/master/database.sql) comes usefull for this need.
-```sh
-mysql -p --user=osposuser ospos < database.sql
-```
-The consolle will ask for the ospsuser password before importi the sql tables
+
 
 ## Download and install Open Source POS
 Get last development OpensourcePos release (3.4 dev), and copy them in the /var/www/html folder.
@@ -40,25 +22,48 @@ User set to www-data so that Apache can read them.
 ```sh
 wget https://github.com/opensourcepos/opensourcepos/archive/refs/heads/master.zip
 unzip master.zip
-sudo mv master/* /var/www/html
+sudo cp -r opensourcepos-master/* /var/www/html
 sudo chown -R www-data:www-data /var/www/html/
 ```
 
 ## compile Open Source POS project
 from  the folder **var/www/html*  run the followinng  commands:
 ```sh
-sudo -u www-data composer install
-sudo -u www-data npm install
-sudo -u www-data npm run build
+cd /var/www/html
+sudo composer install
+sudo npm install
+sudo npm run build
+sudo chown -R www-data:www-data /var/www/html/
+
 ```
-Commands are run as  www-data so that file ownership will let Apache read them.
+Files are owned by  www-data so that file ownership will let Apache read them.
+
+## Create a MySQL database & user; import database tables 
+open a terminal windows, and get mysql admine role
+```sh 
+sudo mysql -u root -p
+```
+When in mysql consolle, give following commands:
+```sh
+CREATE DATABASE ospos;
+CREATE USER 'osposuser'@'localhost' IDENTIFIED BY 'your_db_password_here';
+GRANT ALL PRIVILEGES ON ospos.* TO 'osposuser'@'localhost';
+FLUSH PRIVILEGES;
+exit
+```
+Now we need an sql file, to import the tables used by ospos. 
+the sql file has just been created when compiling with npm our project 
+```sh
+mysql -p --user=osposuser ospos < /var/www/html/app/Database/database.sql
+```
+The consolle will ask for the ospsuser password before importi the sql tables
 ## Configure Open Source POS
-Edit file app/Config/Database.php  to update mysql account user/pwd
+Edit file app/Config/Database.php, section public array $default,  to update mysql account user/pwd 
 | Field | Value |
 | ------ | ------ |
 |'hostname' |  'localhost'|
 |'username' | 'osposuser'|
-|'password' | 'your_password_here' |
+|'password' | 'your_db_password_here' |
 |'database' | 'ospos'|
 
 ## Configure Apache
@@ -69,7 +74,7 @@ sudo -u www-data nano /etc/apache2/sites-available/opensourcepos.conf
 In the editor add the following lines
 ```sh
 <VirtualHost *:80>
-    ServerName your_server_ip_or_hostname
+    ServerName ___YOUR_SERVEr_IP_OR_HOSTNAME___
     DocumentRoot /var/www/html/
     <Directory /var/www/html/>
         Options Indexes FollowSymLinks
@@ -89,11 +94,11 @@ You also need to enable the rewrite module and the new virtual host configuratio
 ```sh
 sudo a2enmod rewrite
 sudo a2ensite opensourcepos.conf
-sudo systemctl restart apache2
+sudo systemctl reload apache2
 ```
 
 ## LOGIN
-    Log in using via the browser :
+    Log in using via the browser the address your_serve_ip_or_address/public:
     • Username: admin 
     • Password: pointofsale 
     
